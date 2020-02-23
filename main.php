@@ -3,11 +3,12 @@ include __DIR__."/vendor/autoload.php";
 
 $source = new MongoDataSource\MongoDataSource();
 $source->setLocation("test/users");
-$res= $source->insert(array(
+/*$res= $source->insert(array(
     '_id' => 'bob1',
     'username' => 'admin',
     'email' => 'bob@example.com',
-    'name' => 'bob User',));
+    'name' => 'bob User',));*/
+$res = $source->getMany();
 var_dump($res);
 
 //$collection = (new MongoDB\Client)->test->users;

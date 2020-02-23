@@ -52,8 +52,15 @@ class MongoDataSource extends AbstractDataSource{
   }
   
   public function getOne(){ }
+  
   public function getMany():array{
-    
+     $return = [];
+     $documents = $this->getCollection()->find();
+     foreach($documents as $doc){
+       $doc["_id"] = (string)$doc["_id"];
+       $return[] = (array)$doc;
+     }
+    return $return;
   }
   public function getCount():int{}
   
@@ -71,7 +78,6 @@ class MongoDataSource extends AbstractDataSource{
         }
         throw new QuerySyntaxException($e->getMessage());
       }
-      //var_dump($insertOneResult->getInsertedId());
     }
     
     return $id;
