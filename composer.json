@@ -1,0 +1,21 @@
+{
+    "name": "cabox/mongo-php",
+    "require": {
+        "mongodb/mongodb": "1.5.0",
+        "procureplus/ppcore": "dev-PP-11085"
+    },
+   "repositories":[
+      {"type": "composer", "url": "https://repo.packagist.com/procureplus/"}
+    ],
+    "authors": [
+        {
+            "name": "mikebamber",
+            "email": "mikebamber@live.com"
+        }
+    ],
+      "autoload": {
+        "psr-4" : {
+            "MongoDataSource\\" : "src/"
+        }
+    }
+}
