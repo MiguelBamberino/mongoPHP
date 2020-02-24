@@ -11,14 +11,15 @@ for($i=1;$i<=40;$i++){
 $res = $source
   /*->limit(5)
   ->orderBy('username','ASC')
-  ->orderBy('_id','ASC')
-  ->selects(['_id'=>'ref','username'=>'uname','name'=>'alias'])*/
+  ->orderBy('_id','ASC')*/
+  ->selects(['_id'=>'ref','username'=>'uname','name'=>'alias'])
   ->where('_id','>',10)
   ->where('_id','<',21)
   ->where('username','=',9)
-  ->keyBy('_id')
-  ->getMany();
-  cliTable($res); 
+  ->keyBy('ref')
+  ->getOne();
+  var_dump($res); 
+  #cliTable($res); 
 
 //$collection = (new MongoDB\Client)->test->users;
 /*

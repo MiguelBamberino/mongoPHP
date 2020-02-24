@@ -2,6 +2,7 @@
 namespace MongoDataSource;
 use PPCore\Adapters\DataSources\DataSourceInterface;
 use PPCore\Adapters\DataSources\AbstractDataSource;
+use PPCore\Helpers\ArrayHelper;
 use PPCore\Exceptions\LocationNotSetException;
 use PPCore\Exceptions\QuerySyntaxException;
 
@@ -113,7 +114,11 @@ class MongoDataSource extends AbstractDataSource{
     return $options;
   }
   
-  public function getOne(){ }
+  public function getOne(){
+    $this->limit(1);
+    $res = $this->getMany();
+    return ArrayHelper::first($res);
+  }
   
   public function getMany():array{
      $return = [];
@@ -195,3 +200,4 @@ public function truncate():bool;
 public function destroy():bool;
 public function create(array $headings):bool;
 public function resourceExists():bool;
+*/
