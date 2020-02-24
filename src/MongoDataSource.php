@@ -51,14 +51,62 @@ class MongoDataSource extends AbstractDataSource{
     
   }
   
+  private function formatDocument($document):array{
+    if(isset($document[$this->primary_key]) && // is the pk in the retrieved document
+       (empty($this->selects)  // if select empty, then select *, therefore include pk
+        || isset($this->selects[$this->primary_key])  // in key, because using aliases
+        || in_array($this->primary_key,$this->selects) ) ){ // in array at int pos, not using aliases
+        
+         $document[$this->primary_key] = (string)$document[$this->primary_key];
+       }
+    
+    if(count($this->selects)>0){
+      $new = [];
+      var_dump($this->selects);
+      foreach($this->selects as $select){
+        $new[$select['as']] = $document[$select['field']];
+      }
+      return $new;
+    }else{
+      return (array)$document;
+      
+    }  
+  }
+  
+  private function applySelects($options){
+    if(!empty($this->selects)){
+      $options['projection']=[];
+      foreach($this->selects as $select){
+        $options['projection'][$select['field']]=1;
+      }
+    }
+    return $options;
+  }
+  
+  private function applyLimit($options){
+    if(isset($this->limit['limit'])){
+      $options['limit'] = $this->limit['limit'];
+    }
+    if(isset($this->limit['offset'])){
+      $options['skip'] = $this->limit['offset'];
+    }
+    return $options;
+  }
+  
   public function getOne(){ }
   
   public function getMany():array{
      $return = [];
-     $documents = $this->getCollection()->find();
+     $filters = [];
+     $options = [];
+     $options = $this->applySelects($options);
+     $options = $this->applyLimit($options);
+      var_dump($options);
+     $documents = $this->getCollection()->find($filters,$options);
+     #$documents = $this->getCollection()->find($filters,['projection'=>['email'=>1],'limit'=>1]);
+    
      foreach($documents as $doc){
-       $doc["_id"] = (string)$doc["_id"];
-       $return[] = (array)$doc;
+       $return[] = $this->formatDocument($doc);
      }
     return $return;
   }

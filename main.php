@@ -2,14 +2,13 @@
 include __DIR__."/vendor/autoload.php";
 
 $source = new MongoDataSource\MongoDataSource();
-$source->setLocation("test/users");
-/*$res= $source->insert(array(
-    '_id' => 'bob1',
-    'username' => 'admin',
-    'email' => 'bob@example.com',
-    'name' => 'bob User',));*/
-$res = $source->getMany();
-var_dump($res);
+$source->setLocation("test/users6");
+/*for($i=0;$i<40;$i++){
+  $res= $source->insert(array('_id' => "ID-{$i}",'username' => "bob {$i}",'email' => 'bob@example.com','name' => "bob User {$i}"));
+  var_dump($res); 
+}*/
+$res = $source->limit(2,2)->selects(['_id'=>'ref','username'=>'uname','name'=>'alias'])->getMany();
+  var_dump($res); 
 
 //$collection = (new MongoDB\Client)->test->users;
 /*
