@@ -62,7 +62,6 @@ class MongoDataSource extends AbstractDataSource{
     
     if(count($this->selects)>0){
       $new = [];
-      var_dump($this->selects);
       foreach($this->selects as $select){
         $new[$select['as']] = $document[$select['field']];
       }
@@ -83,6 +82,27 @@ class MongoDataSource extends AbstractDataSource{
     return $options;
   }
   
+  private function applyWheres($filters){
+    
+    $operator_map = ['='=>'$eq','!='=>'$ne','IN'=>'$in','NOT IN'=>'$nin',
+                     '>'=>'$gt','>='=>'$gte','<'=>'$lt','<='=>'$lte'];
+    
+    foreach($this->wheres as $where){
+      $val = is_numeric($where['value'])?$where['value']*1:$where['value'];
+      $op = $operator_map[$where['operator']];
+      $filters[$where['attribute']][$op]=$val;
+    }
+    return $filters;
+  }
+  
+  private function applyOrderBy($options){
+    
+    foreach($this->orderBy as $o){
+    $options['sort'][$o['order']]=($o['dir']==='ASC')?1:-1;
+      
+    }
+    return $options;
+  }
   private function applyLimit($options){
     if(isset($this->limit['limit'])){
       $options['limit'] = $this->limit['limit'];
@@ -100,13 +120,21 @@ class MongoDataSource extends AbstractDataSource{
      $filters = [];
      $options = [];
      $options = $this->applySelects($options);
+     $filters = $this->applyWheres($filters);
+     $options = $this->applyOrderBy($options);
      $options = $this->applyLimit($options);
+      var_dump($filters);
       var_dump($options);
      $documents = $this->getCollection()->find($filters,$options);
      #$documents = $this->getCollection()->find($filters,['projection'=>['email'=>1],'limit'=>1]);
     
      foreach($documents as $doc){
-       $return[] = $this->formatDocument($doc);
+       if($this->keyBy){
+          $ret = $this->formatDocument($doc);
+          $return[ $ret[$this->keyBy] ] = $ret;
+       }else{
+          $return[] = $this->formatDocument($doc);         
+       }
      }
     return $return;
   }
@@ -139,3 +167,31 @@ class MongoDataSource extends AbstractDataSource{
   public function truncate():bool{}
   public function resourceExists():bool{}
 }
+/*
+TODO :
+
+public function getConfig();
+>>public function cloneSelf():DataSourceInterface;
+>>public function setLocation(string $locationString):DataSourceInterface;
+>>public function getLocation():string;
+>>public function selects(array $fields):DataSourceInterface;
+>>public function where(string $attr, string $operator,$value = null):DataSourceInterface;
+>>public function whereIn(string $attr, array $values):DataSourceInterface;
+>>public function whereNotIn(string $attr, array $values):DataSourceInterface;
+public function andOr(array $conditions):DataSourceInterface;
+public function aggregateOrAnd(array $key_pairs_array):DataSourceInterface;
+>>public function limit(int $offset,int $limit = null):DataSourceInterface;
+>>public function orderBy(string $field,string $direction = 'ASC'):DataSourceInterface;
+public function groupBy(string $grouping):DataSourceInterface;
+>>public function keyBy(string $key):DataSourceInterface;
+public function getOne();
+>>public function getMany():array;
+public function getCount():int;
+public function clearState();
+public function insert(array $data);
+public function insertMany(array $data):bool;
+public function update(array $data):bool ;
+public function truncate():bool;
+public function destroy():bool;
+public function create(array $headings):bool;
+public function resourceExists():bool;
