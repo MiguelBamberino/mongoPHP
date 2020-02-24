@@ -113,7 +113,15 @@ class MongoDataSource extends AbstractDataSource{
     }
     return $options;
   }
-  
+  private function collateFiltersAndOptions(){
+     $filters = [];
+     $options = [];
+     $options = $this->applySelects($options);
+     $filters = $this->applyWheres($filters);
+     $options = $this->applyOrderBy($options);
+     $options = $this->applyLimit($options);
+    return ['filters'=>$filters,'options'=>$options];
+  }
   public function getOne(){
     $this->limit(1);
     $res = $this->getMany();
@@ -122,16 +130,8 @@ class MongoDataSource extends AbstractDataSource{
   
   public function getMany():array{
      $return = [];
-     $filters = [];
-     $options = [];
-     $options = $this->applySelects($options);
-     $filters = $this->applyWheres($filters);
-     $options = $this->applyOrderBy($options);
-     $options = $this->applyLimit($options);
-      var_dump($filters);
-      var_dump($options);
-     $documents = $this->getCollection()->find($filters,$options);
-     #$documents = $this->getCollection()->find($filters,['projection'=>['email'=>1],'limit'=>1]);
+     $conf = $this->collateFiltersAndOptions();
+     $documents = $this->getCollection()->find($conf['filters'],$conf['options']);
     
      foreach($documents as $doc){
        if($this->keyBy){
@@ -143,7 +143,10 @@ class MongoDataSource extends AbstractDataSource{
      }
     return $return;
   }
-  public function getCount():int{}
+  public function getCount():int{
+    $conf = $this->collateFiltersAndOptions();
+    return $this->getCollection()->count($conf['filters'],$conf['options']);
+  }
   
   public function insert(array $data){
     $id = false;
@@ -189,9 +192,9 @@ public function aggregateOrAnd(array $key_pairs_array):DataSourceInterface;
 >>public function orderBy(string $field,string $direction = 'ASC'):DataSourceInterface;
 public function groupBy(string $grouping):DataSourceInterface;
 >>public function keyBy(string $key):DataSourceInterface;
-public function getOne();
+>>public function getOne();
 >>public function getMany():array;
-public function getCount():int;
+>>public function getCount():int;
 public function clearState();
 public function insert(array $data);
 public function insertMany(array $data):bool;

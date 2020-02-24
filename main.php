@@ -15,9 +15,9 @@ $res = $source
   ->selects(['_id'=>'ref','username'=>'uname','name'=>'alias'])
   ->where('_id','>',10)
   ->where('_id','<',21)
-  ->where('username','=',9)
-  ->keyBy('ref')
-  ->getOne();
+  ->where('username','!=',9)
+ # ->keyBy('ref')
+  ->getCount();
   var_dump($res); 
   #cliTable($res); 
 
